@@ -1,0 +1,49 @@
+@startuml
+
+interface "VHDL and C Code" as vhdnc
+interface "USB Blaster" as usb
+component "Cyclone IV" as cyc
+component "Memory" as mem
+component "Nios II" as nios
+interface "Green LED" as gled
+interface "Red LED" as rled
+component "I2C" as ic
+component "EEPROM" as eep
+interface "COM Port" as com
+
+cloud "Software" as software{
+    interface "Task 1" as t1
+    interface "Task 2" as t2
+    interface "Mutex" as tex
+
+}
+vhdnc -[#green]-> usb
+usb -[#green]-> cyc
+cyc -[#blue].> mem: Connect memory
+cyc -left-> mem: C code is stored in memory.
+
+cyc -[#blue].> nios: VHDL code is\nused to create Nios II\non FPGA
+cyc -[#blue].> gled: Connect Green LED
+cyc -[#blue].> rled: Connect Red LED
+
+mem --> nios: C code is read from memory
+
+mem -[#purple]-> software
+nios -[#purple]-> software
+
+t1 -[#purple]-> tex
+t2 -[#purple]-> tex
+
+tex -[#purple]-> com: If Task 1
+tex -[#purple]-> gled: If Task 2
+
+com -[#purple]-> t1: Selection returned\n to Task 1
+
+t1 -[#purple]-> ic: If option 1 or 2
+t1 -[#purple]-> rled: If option 3 or 4
+
+ic -[#purple]-> t1: If Read result\n returned to Task 1\n for printing
+
+ic <--> eep: R/W operations
+
+@enduml
